@@ -31,9 +31,8 @@ public class PracticeController {
         List<String> songNames = Arrays.asList(
                 "Kill Bill", "Daydreaming", "Havana (feat. Young Thug)"
         );
-
         // TODO sort songs by names
-
+        songNames.sort((s1, s2) -> s1.toLowerCase().compareTo(s2.toLowerCase()));
         return songNames;
     }
 
@@ -45,10 +44,25 @@ public class PracticeController {
     @GetMapping("/mostPopularSongs")
     public Map<String, Object> getMostPopularSongs() throws IOException {
         ClassPathResource resource = new ClassPathResource("data/popular_songs.json");
-        JsonNode songsNode = objectMapper.readTree(resource.getFile());
-        List<Map<String, Object>> songsList = objectMapper.convertValue(songsNode, List.class);
 
-        return songsList.get(0);  // TODO return the song with the highest popularity
+        JsonNode songsNode;
+        try (var inputStream = resource.getInputStream()) {
+            songsNode = objectMapper.readTree(inputStream);
+        }
+        //JsonNode songsNode = objectMapper.readTree(resource.getFile());
+        List<Map<String, Object>> songsList = objectMapper.convertValue(songsNode, List.class);
+        Map<String, Object> res = songsList.get(0);
+        int max = (int) res.get("popularity");
+        for(Map<String, Object> sng : songsList){
+            if((int)sng.get("popularity")> max){
+                res = sng;
+                max = (int)sng.get("popularity");
+            }
+        }
+
+        return res;
+
+        //return songsList.get(0);  // TODO return the song with the highest popularity
     }
 
 }
