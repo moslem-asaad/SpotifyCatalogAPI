@@ -31,7 +31,15 @@ public class SpotifyUtils {
      * @return true if the string is a valid Spotify ID, false otherwise.
      */
     public static boolean isValidId(String id) {
+        if(id == null || id.length() < 15 || id.length() > 30) return false;
+        for(char c : id.toCharArray()){
+            if(!validCharForId(c)) return false;
+        }
         return true;
+    }
+
+    private static boolean validCharForId(char c){
+        return (c >= 'a' && c <= 'z') || (c>= 'A' && c <= 'Z') || (c >= '0' && c <= '9');
     }
 
     /**

@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 
-@Disabled("Should be enabled for Junit exercises")
 public class SpotifyUtilsTest {
 
     @Test
@@ -23,9 +22,19 @@ public class SpotifyUtilsTest {
         assertFalse(isValidId(null)); // null ID
         assertFalse(isValidId("")); // empty ID
         assertFalse(isValidId("shortID")); // too short ID (less than 15 characters)
-        assertFalse(isValidId("thisIDiswaytoolongtobevalid")); // too long ID (more than 30 characters)
+        assertFalse(isValidId("thisIDiswaytoolongtobevalidaaaa")); // too long ID (more than 30 characters)
         assertFalse(isValidId("!@#$$%^&*()_+")); // invalid characters
         assertFalse(isValidId("1234567890abcdefGHIJKLMNO!@#")); // includes invalid characters
+    }
+
+    @Test
+    public void testValidURI(){
+
+    }
+
+    @Test
+    public void testInvalidURI(){
+
     }
 
 }
