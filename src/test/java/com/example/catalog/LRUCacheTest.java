@@ -1,10 +1,10 @@
 package com.example.catalog;
 
 import com.example.catalog.utils.LRUCache;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
+import static org.junit.jupiter.api.Assertions.*;
+
+
 
 class LRUCacheTest {
 
@@ -23,12 +23,14 @@ class LRUCacheTest {
         @DisplayName("cache is initially empty")
         void isEmpty() {
             // TODO assert cache is empty
+            assertTrue(cache.isEmpty());
         }
 
         @Test
         @DisplayName("throws NullPointerException when getting a null key")
         void throwsExceptionWhenGettingNullKey() {
             // TODO assert NullPointerException thrown on `cache.get(null)`
+            assertThrows(NullPointerException.class,() -> cache.get(null));
         }
 
         @Nested
@@ -38,12 +40,15 @@ class LRUCacheTest {
             @BeforeEach
             void addElements() {
                 // TODO add 2 elements
+                cache.set("k1","v1");
+                cache.set("k2","v2");
             }
 
             @Test
             @DisplayName("cache contains the added elements")
             void containsAddedElements() {
                 // TODO assert the added 2 elements are available
+                assertEquals(2,cache.size());
             }
         }
 
@@ -54,6 +59,9 @@ class LRUCacheTest {
             @BeforeEach
             void addElements() {
                 // TODO add 3 elements
+                cache.set("k1","v1");
+                cache.set("k2","v2");
+                cache.set("k3","v3");
             }
 
             @Nested
@@ -67,6 +75,7 @@ class LRUCacheTest {
                 @BeforeEach
                 void clearCache() {
                     // TODO clear the cache after
+                    cache.clear();
                 }
             }
         }
