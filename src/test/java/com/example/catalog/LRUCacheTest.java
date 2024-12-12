@@ -32,7 +32,12 @@ class LRUCacheTest {
             // TODO assert NullPointerException thrown on `cache.get(null)`
             assertThrows(NullPointerException.class,() -> cache.get(null));
         }
-
+        @Test
+        @DisplayName("throws NullPointerException when setting a null key")
+        void throwsExceptionWhenSettingNullKey() {
+            // TODO assert NullPointerException thrown on `cache.get(null)`
+            assertThrows(NullPointerException.class,() -> cache.set(null,"val"));
+        }
         @Nested
         @DisplayName("after adding 2 elements")
         class AfterAdding2Elements {
@@ -49,7 +54,22 @@ class LRUCacheTest {
             void containsAddedElements() {
                 // TODO assert the added 2 elements are available
                 assertEquals(2,cache.size());
+                assertTrue(cache.containsKey("k1"));
+                assertTrue(cache.containsKey("k2"));
+                assertEquals("v1",cache.get("k1"));
+                assertEquals("v2",cache.get("k2"));
+                assertFalse(cache.containsKey("k3"));
             }
+
+            @Test
+            @DisplayName("cache can the add one more element")
+            void AddOneMoreElement() {
+                cache.set("k3","v3");
+                assertEquals(3,cache.size());
+                assertTrue(cache.containsKey("k3"));
+                assertEquals("v3",cache.get("k3"));
+            }
+
         }
 
         @Nested
@@ -64,6 +84,18 @@ class LRUCacheTest {
                 cache.set("k3","v3");
             }
 
+            @Test
+            @DisplayName("cache add element and delete the lru element")
+            void AddOneMoreElement() {
+                cache.set("k4","v4");
+                assertEquals(3,cache.size()); // validate the size is 3
+                assertTrue(cache.containsKey("k4"));
+                assertEquals("v4",cache.get("k4"));
+                assertFalse(cache.containsKey("k1"));
+            }
+
+
+
             @Nested
             @DisplayName("when cleared")
             class WhenCleared {
@@ -76,6 +108,19 @@ class LRUCacheTest {
                 void clearCache() {
                     // TODO clear the cache after
                     cache.clear();
+                }
+
+                @Test
+                @DisplayName("cache is empty")
+                void CacheIsEmpty() {
+                    assertTrue(cache.isEmpty());
+                }
+
+                @Test
+                @DisplayName("cache size is one after clear and addind one element")
+                void AddElementFail() {
+                    cache.set("k4","v4");
+                    assertEquals(1,cache.size());
                 }
             }
         }
