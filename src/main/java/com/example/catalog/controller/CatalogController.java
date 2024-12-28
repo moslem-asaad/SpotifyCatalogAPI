@@ -1,5 +1,6 @@
 package com.example.catalog.controller;
 
+import com.example.catalog.model.Artist;
 import com.example.catalog.utils.CatalogUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -210,6 +211,23 @@ public class CatalogController {
             errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
             return new ResponseEntity<> (errorResponse,HttpStatus.INTERNAL_SERVER_ERROR );
         }
+    }
+
+    @GetMapping("/artists/{id}")
+    public ResponseEntity<Artist> getArtistById(@PathVariable String id) throws IOException {
+        if (! SpotifyUtils.isValidId(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+
+        ClassPathResource resource = new ClassPathResource("data/popular_artists.json");
+        JsonNode artists = objectMapper.readTree(resource.getFile());
+
+        JsonNode artistNode = artists.get(id);
+        if (artistNode == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return  ResponseEntity.ok(objectMapper.treeToValue(artistNode, Artist.class));
     }
 
 }
