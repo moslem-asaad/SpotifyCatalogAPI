@@ -13,10 +13,16 @@ public class RequestInterceptorConfig implements WebMvcConfigurer {
     @Value("${rate-limit.enabled}")
     private String rateLimitEnabled;
 
+    private final RateLimit rateLimit;
+
+    public RequestInterceptorConfig(RateLimit rateLimit) {
+        this.rateLimit = rateLimit;
+    }
+
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         if (Objects.equals(rateLimitEnabled, "true")) {
-            registry.addInterceptor(new RateLimit());
+            registry.addInterceptor(rateLimit);
         }
     }
 }

@@ -1,4 +1,4 @@
-package com.example.catalog;
+package com.example.catalog.rateLimitTests;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,7 +10,7 @@ import org.springframework.http.ResponseEntity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
-public class RateLimitTest {
+public class RateLimitITest {
 
     @Autowired
     private TestRestTemplate restTemplate;
