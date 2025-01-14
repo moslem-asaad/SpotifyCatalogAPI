@@ -3,7 +3,7 @@ name: SpotifyCatalogAPI tests
 on:
   pull_request:
     branches:
-      - *
+      - main
 
 jobs:
   Test:
