@@ -230,5 +230,7 @@ public class CatalogController {
         return  ResponseEntity.ok(objectMapper.treeToValue(artistNode, Artist.class));
     }
 
+    //in load balancer
+
 }
 
