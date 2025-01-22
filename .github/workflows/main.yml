@@ -1,5 +1,10 @@
 name: SpotifyCatalogAPI tests
 
+permissions:
+  contents: read
+  actions: read
+  checks: write
+
 on:
   pull_request:
     branches:
@@ -21,4 +26,19 @@ jobs:
 
       - name: Run Tests
         run: |
-          mvn test -q
+          mvn test -q -Dtest=CatalogUtilsTest,SpotifyUtilsTest
+
+      - name: Test Report
+        uses: dorny/test-reporter@v1
+        if: success() || failure()    # run this step even if previous step failed
+        with:
+          name: Maven Surefire Tests
+          path: 'target/surefire-reports/TEST-*.xml'
+          reporter: java-junit         # Correct value for Maven Surefire
+          list-suites: all
+          list-tests: all
+          max-annotations: 10
+          fail-on-error: true
+          fail-on-empty: true
+          only-summary: false
+          path-replace-backslashes: false
