@@ -34,10 +34,11 @@ jobs:
         with:
           name: Maven Surefire Tests
           path: 'target/surefire-reports/TEST-*.xml'
-          reporter: junit         # Use 'junit' for Maven Surefire test reports
+          reporter: java-junit         # Correct value for Maven Surefire
           list-suites: all
           list-tests: all
           max-annotations: 10
           fail-on-error: true
           fail-on-empty: true
           only-summary: false
+          path-replace-backslashes: false
