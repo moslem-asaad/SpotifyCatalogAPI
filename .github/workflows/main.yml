@@ -48,7 +48,7 @@ jobs:
           only-summary: false
           path-replace-backslashes: false
 
-  Test Style:
+  Test_Style:
     name: Check Style
     runs-on: ubuntu-latest
     steps:
