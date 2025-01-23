@@ -1,4 +1,4 @@
-name: SpotifyCatalogAPI tests
+name: SpotifyCatalogAPI tests with spotify testing
 
 on:
   pull_request:
