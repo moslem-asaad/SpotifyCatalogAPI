@@ -2,9 +2,13 @@ package com.example.catalog.controller;
 
 import com.example.catalog.model.Artist;
 import com.example.catalog.utils.CatalogUtils;
+import com.example.catalog.utils.SpotifyUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.IOException;
+import java.util.List;
+import java.util.stream.StreamSupport;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -13,41 +17,26 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.IOException;
-import java.util.List;
-import java.util.stream.StreamSupport;
 
-import com.example.catalog.utils.SpotifyUtils;
-
+/**
+ * This controller provides APIs for managing and retrieving catalog data.
+ */
 @RestController
 public class CatalogController {
 
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-   /* @GetMapping("/popularSongs")
-    public ResponseEntity<JsonNode> getPopularSongs() throws IOException {
-        ObjectNode errorResponse = objectMapper.createObjectNode();
-        try {
-            if(emptyPopularSongsHandler()) {
-                errorResponse.put("message", "Service temporarily unavailable");
-                errorResponse.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
-                return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
-            }
-
-            ClassPathResource resource = new ClassPathResource("data/popular_songs.json");
-            return new ResponseEntity<>(objectMapper.readTree(resource.getFile()), HttpStatus.OK);
-        }catch (Exception e){
-            errorResponse.put("message", "Internal server error occurred");
-            errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return new ResponseEntity<> (errorResponse,HttpStatus.INTERNAL_SERVER_ERROR );
-        }
-    }*/
-
+    /**
+     * Retrieves a list of popular artists.
+     *
+     * @return ResponseEntity containing the popular artists or an error message.
+     * @throws IOException if an I/O error occurs.
+     */
     @GetMapping("/popularArtists")
     public ResponseEntity<JsonNode> getPopularArtists() throws IOException {
         ObjectNode errorResponse = objectMapper.createObjectNode();
         try {
-            if(emptyPopularSongsHandler()) {
+            if (emptyPopularSongsHandler()) {
                 errorResponse.put("message", "Service temporarily unavailable");
                 errorResponse.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
                 return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
@@ -55,13 +44,20 @@ public class CatalogController {
 
             ClassPathResource resource = new ClassPathResource("data/popular_artists.json");
             return new ResponseEntity<>(objectMapper.readTree(resource.getFile()), HttpStatus.OK);
-        }catch (Exception e){
+        } catch (Exception e) {
             errorResponse.put("message", "Internal server error occurred");
             errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return new ResponseEntity<> (errorResponse,HttpStatus.INTERNAL_SERVER_ERROR );
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * returns album by id.
+     *
+     * @param id the album id
+     * @return album by id
+     * @throws IOException if an I/O error occurs.
+     */
     @GetMapping("/albums/{id}")
     public ResponseEntity<JsonNode> getAlbumById(@PathVariable String id) throws IOException {
         ObjectNode errorResponse = objectMapper.createObjectNode();
@@ -70,39 +66,45 @@ public class CatalogController {
             if (!SpotifyUtils.isValidId(id)) {
                 errorResponse.put("message", "Invalid album ID provided.");
                 errorResponse.put("status", HttpStatus.BAD_REQUEST.value());
-                return new ResponseEntity<> (errorResponse,HttpStatus.BAD_REQUEST );
+                return new ResponseEntity<>(errorResponse, HttpStatus.BAD_REQUEST);
             }
             // Handle 403: Forbidden ID (all zeros)
             if (id.matches("0+")) {
                 errorResponse.put("message", "Forbidden album id");
                 errorResponse.put("status", HttpStatus.FORBIDDEN.value());
-                return new ResponseEntity<> (errorResponse,HttpStatus.FORBIDDEN );
+                return new ResponseEntity<>(errorResponse, HttpStatus.FORBIDDEN);
             }
 
-            if(emptyPopularSongsHandler()) {
+            if (emptyPopularSongsHandler()) {
                 errorResponse.put("message", "Service temporarily unavailable");
                 errorResponse.put("status", HttpStatus.SERVICE_UNAVAILABLE.value());
-                return new ResponseEntity<> (errorResponse,HttpStatus.SERVICE_UNAVAILABLE );
+                return new ResponseEntity<>(errorResponse, HttpStatus.SERVICE_UNAVAILABLE);
             }
 
             ClassPathResource resource = new ClassPathResource("data/albums.json");
             JsonNode albums = objectMapper.readTree(resource.getFile());
             JsonNode album = albums.get(id);
             if (album != null) {
-                return new ResponseEntity<>(album,HttpStatus.OK);
+                return new ResponseEntity<>(album, HttpStatus.OK);
             } else {
                 errorResponse.put("message", "Album with id " + id + " not found");
                 errorResponse.put("status", HttpStatus.NOT_FOUND.value());
-                return new ResponseEntity<> (errorResponse,HttpStatus.NOT_FOUND );
+                return new ResponseEntity<>(errorResponse, HttpStatus.NOT_FOUND);
             }
         }
-        catch (Exception e){
+        catch (Exception e) {
             errorResponse.put("message", "Internal server error occurred");
             errorResponse.put("status", HttpStatus.INTERNAL_SERVER_ERROR.value());
-            return new ResponseEntity<> (errorResponse,HttpStatus.INTERNAL_SERVER_ERROR );
+            return new ResponseEntity<>(errorResponse, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
+    /**
+     * returns true false.
+     *
+     * @return true false
+     * @throws IOException if an I/O error occurs.
+     */
     private boolean emptyPopularSongsHandler() throws IOException {
         ClassPathResource popularSongResource = new ClassPathResource("data/popular_songs.json");
         JsonNode popularSongs = objectMapper.readTree(popularSongResource.getFile());
