@@ -2,6 +2,7 @@ package com.example.catalog.services;
 
 import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
+import com.example.catalog.model.Song;
 import com.example.catalog.model.Track;
 import org.springframework.stereotype.Service;
 
@@ -63,5 +64,30 @@ public class SpotifyAPIDataSources implements DataSourceService{
     @Override
     public List<Track> getAlbumTracks(String id) throws IOException {
         return null;
+    }
+
+    @Override
+    public List<Song> getAllSongs() throws IOException {
+        return null;
+    }
+
+    @Override
+    public Song getSongById(String id) throws IOException {
+        return null;
+    }
+
+    @Override
+    public Song createSong(Song song) throws IOException {
+        return null;
+    }
+
+    @Override
+    public Song updateSong(Song song) throws IOException {
+        return null;
+    }
+
+    @Override
+    public boolean deleteSongById(String id) throws IOException {
+        return false;
     }
 }

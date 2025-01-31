@@ -2,10 +2,12 @@ package com.example.catalog.services;
 
 import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
+import com.example.catalog.model.Song;
 import com.example.catalog.model.Track;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
@@ -24,6 +26,7 @@ public class JSONDataSourceService implements DataSourceService{
 
     private final String artistPath = "data/popular_artistsTest.json";
     private final String albumPath = "data/albums.json";
+    private final String songsPath = "data/popular_songs.json";
 
     @Override
     public Artist getArtistById(String id) throws IOException {
@@ -206,6 +209,124 @@ public class JSONDataSourceService implements DataSourceService{
         }
         return tracks;
 
+    }
+
+    @Override
+    public List<Song> getAllSongs() throws IOException {
+        JsonNode songs = loadJsonData(songsPath);
+        if (songs == null){
+            return null;
+        }
+        List<Song> songList = new ArrayList<>();
+        Iterator<JsonNode> elements = songs.elements();
+        while (elements.hasNext()) {
+            songList.add(objectMapper.treeToValue(elements.next(), Song.class));
+        }
+        return songList;
+    }
+
+    @Override
+    public Song getSongById(String id) throws IOException {
+        JsonNode songs = loadJsonData(songsPath);
+        if (songs == null || !songs.isArray()) {
+            return null;
+        }
+        for (JsonNode songNode : songs) {
+            JsonNode songIdNode = songNode.get("id");
+            if (songIdNode != null && songIdNode.asText().equals(id)) {
+                return objectMapper.treeToValue(songNode, Song.class);
+            }
+        }
+
+        return null;
+    }
+
+    @Override
+    public Song createSong(Song song) throws IOException {
+        if (song == null || song.getId() == null || song.getId().isEmpty()) {
+            return null;
+        }
+
+        JsonNode songsNode = loadJsonData(songsPath);
+        if (songsNode == null || !songsNode.isArray()) {
+            songsNode = objectMapper.createArrayNode();
+        }
+
+        for (JsonNode existingSongNode : songsNode) {
+            JsonNode songIdNode = existingSongNode.get("id");
+            if (songIdNode != null && songIdNode.asText().equals(song.getId())) {
+                return null;
+            }
+        }
+
+        JsonNode songNode = objectMapper.valueToTree(song);
+        ((ArrayNode) songsNode).add(songNode);
+        if (saveJsonData(songsNode,songsPath)) {
+            return song;
+        } else {
+            return null;
+        }
+
+    }
+
+    @Override
+    public Song updateSong(Song song) throws IOException {
+        if (song == null || song.getId() == null || song.getId().isEmpty()) {
+            return null;
+        }
+
+        JsonNode songsNode = loadJsonData(songsPath);
+        if (songsNode == null || !songsNode.isArray()) {
+            return null;
+        }
+
+        ArrayNode updatedSongsArray = objectMapper.createArrayNode();
+        boolean found = false;
+
+        for (JsonNode existingSongNode : songsNode) {
+            JsonNode songIdNode = existingSongNode.get("id");
+            if (songIdNode != null && songIdNode.asText().equals(song.getId())) {
+                updatedSongsArray.add(objectMapper.valueToTree(song));
+                found = true;
+            } else {
+                updatedSongsArray.add(existingSongNode);
+            }
+        }
+
+        if (!found) {
+            return null;
+        }
+
+        if (saveJsonData(updatedSongsArray,songsPath)) {
+            return song;
+        } else {
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteSongById(String id) throws IOException {
+        if (id == null || id.isEmpty()) {
+            return false;
+        }
+        JsonNode songsNode = loadJsonData(songsPath);
+        if (songsNode == null || !songsNode.isArray()) {
+            return false;
+        }
+        ArrayNode updatedSongsArray = objectMapper.createArrayNode();
+        boolean found = false;
+        for (JsonNode existingSongNode : songsNode) {
+            JsonNode songIdNode = existingSongNode.get("id");
+            if (songIdNode != null && songIdNode.asText().equals(id)) {
+                found = true;
+            } else {
+                updatedSongsArray.add(existingSongNode);
+            }
+        }
+        if (!found) {
+            return false;
+        }
+        return saveJsonData(updatedSongsArray,songsPath);
     }
 
 

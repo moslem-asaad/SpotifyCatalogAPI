@@ -1,5 +1,8 @@
 package com.example.catalog.model;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
+
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Track {
     private String id;
     private String name;

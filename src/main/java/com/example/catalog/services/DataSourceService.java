@@ -2,6 +2,7 @@ package com.example.catalog.services;
 
 import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
+import com.example.catalog.model.Song;
 import com.example.catalog.model.Track;
 import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
@@ -27,4 +28,13 @@ public interface DataSourceService {
 
     List<Track> getAlbumTracks(String id) throws IOException;
 
+    List<Song> getAllSongs() throws IOException;
+
+    Song getSongById(String id) throws IOException;
+
+    Song createSong(Song song) throws IOException;
+
+    Song updateSong(Song song) throws IOException;
+
+    boolean deleteSongById(String id) throws IOException;
 }
