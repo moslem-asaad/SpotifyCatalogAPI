@@ -39,6 +39,9 @@ public class ArtistController {
     @GetMapping
     public ResponseEntity<List<Artist>> getAllArtists() throws IOException {
         List<Artist> artistList = dataSourceService.getAllArtists();
+        if (artistList == null){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
         if (artistList.isEmpty()) {
             return ResponseEntity.noContent().build();
         }
@@ -47,10 +50,43 @@ public class ArtistController {
 
     @PostMapping
     public ResponseEntity<Artist> createArtist(@RequestBody Artist artist) throws IOException{
+        if (!SpotifyUtils.isValidId(artist.getId())) {
+            return ResponseEntity.badRequest().build();
+        }
         Artist createdArtist = dataSourceService.addArtist(artist);
         if (createdArtist == null){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdArtist);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<Artist> updateArtistById(@PathVariable String id, @RequestBody Artist updatedArtist) throws IOException{
+        if (!SpotifyUtils.isValidId(id)){
+            return ResponseEntity.badRequest().build();
+        }
+        Artist currArtist = dataSourceService.getArtistById(id);
+        if (currArtist == null){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        updatedArtist.setId(id);
+        Artist savedArtist = dataSourceService.updateArtist(updatedArtist);
+        if (savedArtist == null){
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+        return ResponseEntity.ok(savedArtist);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteArtistById(@PathVariable String id) throws IOException{
+        if (!SpotifyUtils.isValidId(id)) {
+            return ResponseEntity.badRequest().build();
+        }
+        boolean isDeleted = dataSourceService.deleteArtistById(id);
+        if (!isDeleted){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 }

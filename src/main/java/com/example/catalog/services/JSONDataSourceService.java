@@ -1,6 +1,9 @@
 package com.example.catalog.services;
 
+import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
+import com.example.catalog.model.Track;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
@@ -19,7 +22,8 @@ import java.util.List;
 public class JSONDataSourceService implements DataSourceService{
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String artistPath = "data/popular_artistsTests.json";
+    private final String artistPath = "data/popular_artistsTest.json";
+    private final String albumPath = "data/albums.json";
 
     @Override
     public Artist getArtistById(String id) throws IOException {
@@ -71,6 +75,138 @@ public class JSONDataSourceService implements DataSourceService{
         }
     }
 
+    @Override
+    public Artist updateArtist(Artist artist) throws IOException {
+        if (artist == null || artist.getId() == null || artist.getId().isEmpty()) {
+            return null;
+        }
+        JsonNode artists = loadJsonData(artistPath);
+        if (artists == null){
+            return null;
+        }
+        ObjectNode artistsObject = (ObjectNode) artists;
+        if (!artistsObject.has(artist.getId())){
+            return null;
+        }
+
+        artistsObject.set(artist.getId(),objectMapper.valueToTree(artist));
+        if (saveJsonData(artistsObject,artistPath)){
+            return artist;
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteArtistById(String id) throws IOException {
+        JsonNode artists = loadJsonData(artistPath);
+        if (artists == null || !artists.has(id)){
+            return false;
+        }
+        ((ObjectNode)artists).remove(id);
+        return saveJsonData(artists,artistPath);
+    }
+
+    @Override
+    public List<Album> getAllAlbums() throws IOException {
+        JsonNode albums = loadJsonData(albumPath);
+        if (albums == null){
+            return null;
+        }
+        List<Album> albumList = new ArrayList<>();
+        Iterator<JsonNode> elements = albums.elements();
+        while (elements.hasNext()) {
+            albumList.add(objectMapper.treeToValue(elements.next(), Album.class));
+        }
+        return albumList;
+    }
+
+    @Override
+    public Album getAlbumById(String id) throws IOException {
+        JsonNode album = getJsonAlbum(id);
+        if (album == null) {
+            return null;
+        }
+        return objectMapper.treeToValue(album, Album.class);
+    }
+
+    private JsonNode getJsonAlbum(String id) throws IOException {
+        JsonNode albums = loadJsonData(albumPath);
+        if (albums == null || !albums.has(id)){
+            return null;
+        }
+        return albums.get(id);
+    }
+
+    @Override
+    public Album createAlbum(Album album) throws IOException {
+        if (album == null || album.getId() == null || album.getId().isEmpty()) {
+            return null;
+        }
+        JsonNode albums = loadJsonData(albumPath);
+        if (albums == null){
+            return null;
+        }
+        ObjectNode albumsObject = (ObjectNode) albums;
+        if (albumsObject.has(album.getId())){
+            return null;
+        }
+
+        albumsObject.set(album.getId(),objectMapper.valueToTree(album));
+        if (saveJsonData(albumsObject,albumPath)){
+            return album;
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public Album updateAlbum(Album album) throws IOException {
+        if (album == null || album.getId() == null || album.getId().isEmpty()) {
+            return null;
+        }
+        JsonNode albums = loadJsonData(albumPath);
+        if (albums == null){
+            return null;
+        }
+        ObjectNode albumsObject = (ObjectNode) albums;
+        if (!albumsObject.has(album.getId())){
+            return null;
+        }
+
+        albumsObject.set(album.getId(),objectMapper.valueToTree(album));
+        if (saveJsonData(albumsObject,albumPath)){
+            return album;
+        }else{
+            return null;
+        }
+    }
+
+    @Override
+    public boolean deleteAlbumById(String id) throws IOException {
+        JsonNode albums = loadJsonData(albumPath);
+        if (albums == null || !albums.has(id)){
+            return false;
+        }
+        ((ObjectNode)albums).remove(id);
+        return saveJsonData(albums,albumPath);
+    }
+
+    @Override
+    public List<Track> getAlbumTracks(String id) throws IOException {
+        JsonNode album = getJsonAlbum(id);
+        if (album == null || !album.has("tracks")) {
+            return null;
+        }
+        JsonNode tracksNode = album.get("tracks");
+        List<Track> tracks = new ArrayList<>();
+        Iterator<JsonNode> elements = tracksNode.elements();
+        while (elements.hasNext()) {
+            tracks.add(objectMapper.treeToValue(elements.next(), Track.class));
+        }
+        return tracks;
+
+    }
 
 
     private JsonNode loadJsonData(String path) throws IOException {
