@@ -6,7 +6,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 public class Track {
     private String id;
     private String name;
-    private long duration_ms;
+    private int duration_ms;
     private boolean explicit;
     private String uri;
 
@@ -26,11 +26,11 @@ public class Track {
         this.name = name;
     }
 
-    public long getDuration_ms() {
+    public int getDuration_ms() {
         return duration_ms;
     }
 
-    public void setDuration_ms(long duration_ms) {
+    public void setDuration_ms(int duration_ms) {
         this.duration_ms = duration_ms;
     }
 

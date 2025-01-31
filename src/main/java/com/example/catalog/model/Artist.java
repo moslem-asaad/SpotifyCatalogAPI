@@ -7,7 +7,7 @@ import java.util.List;
 public class Artist {
     private String id;
     private String name;
-    private int followers;
+    private long followers;
     private List<String> genres;
     private List<Image> images;
     private int popularity;
@@ -29,7 +29,7 @@ public class Artist {
         this.name = name;
     }
 
-    public int getFollowers() {
+    public long getFollowers() {
         return followers;
     }
 
