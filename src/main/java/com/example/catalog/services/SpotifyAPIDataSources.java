@@ -1,5 +1,8 @@
 package com.example.catalog.services;
 
+import com.example.catalog.exceptions.MissingDataException;
+import com.example.catalog.exceptions.ResourceNotFoundException;
+import com.example.catalog.exceptions.UnsupportedOperationException;
 import com.example.catalog.model.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.*;
@@ -58,6 +61,9 @@ public class SpotifyAPIDataSources implements DataSourceService{
         ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
 
         List<Album> albums = new ArrayList<>();
+        if (response.getBody() == null) {
+            throw new ResourceNotFoundException("Albums not found.");
+        }
         if (response.getBody() != null && response.getBody().containsKey("albums")) {
             List<Map<String, Object>> albumsList = (List<Map<String, Object>>) response.getBody().get("albums");
             for (Map<String, Object> albumData : albumsList) {
@@ -93,7 +99,7 @@ public class SpotifyAPIDataSources implements DataSourceService{
         HttpEntity<String> entity = new HttpEntity<>(headers);
         ResponseEntity<Map> response = restTemplate.exchange(url,HttpMethod.GET, entity, Map.class);
         if (response.getBody() == null) {
-            return null;
+            throw new ResourceNotFoundException("Album with ID " + id + " not found.");
         }
         Map<String, Object> albumData = response.getBody();
         Album album = new Album();
@@ -128,38 +134,87 @@ public class SpotifyAPIDataSources implements DataSourceService{
             List<Track> trackList = new ArrayList<>();
             Map<String, Object> tracksData = (Map<String, Object>) albumData.get("tracks");
             List<Map<String, Object>> trackItems = (List<Map<String, Object>>) tracksData.get("items");
-            for (Map<String, Object> trackData : trackItems) {
-                Track track = new Track();
-                track.setId((String) trackData.get("id"));
-                track.setName((String) trackData.get("name"));
-                track.setDuration_ms( (Integer) trackData.get("duration_ms"));
-                track.setExplicit((Boolean) trackData.get("explicit"));
-                track.setUri((String) trackData.get("uri"));
-                trackList.add(track);
-            }
+            trackList = extractTracksHelper(trackItems);
+//            for (Map<String, Object> trackData : trackItems) {
+//                Track track = new Track();
+//                track.setId((String) trackData.get("id"));
+//                track.setName((String) trackData.get("name"));
+//                track.setDuration_ms( (Integer) trackData.get("duration_ms"));
+//                track.setExplicit((Boolean) trackData.get("explicit"));
+//                track.setUri((String) trackData.get("uri"));
+//                trackList.add(track);
+//            }
             return trackList;
         }
         return null;
     }
 
+    private List<Track> extractTracksHelper(List<Map<String, Object>> trackItems){
+        List<Track> trackList = new ArrayList<>();
+        for (Map<String, Object> trackData : trackItems) {
+            Track track = new Track();
+            track.setId((String) trackData.get("id"));
+            track.setName((String) trackData.get("name"));
+            track.setDuration_ms( (Integer) trackData.get("duration_ms"));
+            track.setExplicit((Boolean) trackData.get("explicit"));
+            track.setUri((String) trackData.get("uri"));
+            trackList.add(track);
+        }
+        return trackList;
+    }
+
     @Override
     public Album createAlbum(Album album) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("Create Album Not supported on real spotify app");
     }
 
     @Override
     public Album updateAlbum(Album album) throws IOException {
-        return null;
+        throw new UnsupportedOperationException("Update Album Not supported on real spotify app");
     }
 
     @Override
     public boolean deleteAlbumById(String id) throws IOException {
-        return false;
+        if (id == null || id.isEmpty()) {
+            throw new MissingDataException("Album ID cannot be null or empty.");
+        }
+        String accessToken = spotifyAuthService.getAccessToken();
+        if (accessToken == null) {
+            throw new IOException("Failed to retrieve Spotify access token.");
+        }
+        String url = "https://api.spotify.com/v1/me/albums?ids=" + id;
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+        ResponseEntity<Void> response = restTemplate.exchange(url, HttpMethod.DELETE, entity, Void.class);
+        return response.getStatusCode().is2xxSuccessful();
     }
 
     @Override
     public List<Track> getAlbumTracks(String id) throws IOException {
-        return null;
+        if (id == null || id.isEmpty()) {
+            throw new MissingDataException("Album ID cannot be null or empty.");
+        }
+        String accessToken = spotifyAuthService.getAccessToken();
+        if (accessToken == null) {
+            throw new IOException("Failed to retrieve Spotify access token.");
+        }
+        String url = "https://api.spotify.com/v1/albums/" + id + "/tracks";
+        List<Track> trackList = new ArrayList<>();
+        HttpHeaders headers = new HttpHeaders();
+        headers.set("Authorization", "Bearer " + accessToken);
+        headers.setContentType(MediaType.APPLICATION_JSON);
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        ResponseEntity<Map> response = restTemplate.exchange(url, HttpMethod.GET, entity, Map.class);
+
+        if (response.getBody() == null || !response.getBody().containsKey("items")) {
+            return trackList;
+        }
+        List<Map<String, Object>> trackItems = (List<Map<String, Object>>) response.getBody().get("items");
+        trackList = extractTracksHelper(trackItems);
+        return trackList;
     }
 
     @Override

@@ -1,9 +1,12 @@
 package com.example.catalog.services;
 
+import com.example.catalog.exceptions.InvalidIdException;
+import com.example.catalog.exceptions.MissingDataException;
 import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
 import com.example.catalog.model.Song;
 import com.example.catalog.model.Track;
+import com.example.catalog.utils.SpotifyUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -126,6 +129,10 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public Album getAlbumById(String id) throws IOException {
+        if (!SpotifyUtils.isValidId(id)) {
+            throw new InvalidIdException("Invalid Album Id");
+        }
+
         JsonNode album = getJsonAlbum(id);
         if (album == null) {
             return null;
@@ -144,7 +151,10 @@ public class JSONDataSourceService implements DataSourceService{
     @Override
     public Album createAlbum(Album album) throws IOException {
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Corrupted Data");
+        }
+        if (!SpotifyUtils.isValidId(album.getId())){
+            throw new InvalidIdException("Invalid Album Id");
         }
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
@@ -168,6 +178,9 @@ public class JSONDataSourceService implements DataSourceService{
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
             return null;
         }
+        if (!SpotifyUtils.isValidId(album.getId())) {
+            throw new InvalidIdException("Invalid Album Id");
+        }
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
             return null;
@@ -187,6 +200,9 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public boolean deleteAlbumById(String id) throws IOException {
+        if (!SpotifyUtils.isValidId(id)) {
+            throw new InvalidIdException("Invalid Album Id");
+        }
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null || !albums.has(id)){
             return false;
@@ -200,6 +216,9 @@ public class JSONDataSourceService implements DataSourceService{
         JsonNode album = getJsonAlbum(id);
         if (album == null || !album.has("tracks")) {
             return null;
+        }
+        if (!SpotifyUtils.isValidId(id)) {
+            throw new InvalidIdException("Invalid Album Id");
         }
         JsonNode tracksNode = album.get("tracks");
         List<Track> tracks = new ArrayList<>();
