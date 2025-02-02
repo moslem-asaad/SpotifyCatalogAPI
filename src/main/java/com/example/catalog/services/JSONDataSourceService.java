@@ -33,6 +33,7 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public Artist getArtistById(String id) throws IOException {
+        isValidId(id);
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null){
             return null;
@@ -63,6 +64,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (artist == null || artist.getId() == null || artist.getId().isEmpty()) {
             return null;
         }
+        isValidId(artist.getId());
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null) {
             artists = objectMapper.createObjectNode();
@@ -86,6 +88,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (artist == null || artist.getId() == null || artist.getId().isEmpty()) {
             return null;
         }
+        isValidId(artist.getId());
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null){
             return null;
@@ -109,6 +112,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (artists == null || !artists.has(id)){
             return false;
         }
+        isValidId(id);
         ((ObjectNode)artists).remove(id);
         return saveJsonData(artists,artistPath);
     }
@@ -129,15 +133,18 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public Album getAlbumById(String id) throws IOException {
-        if (!SpotifyUtils.isValidId(id)) {
-            throw new InvalidIdException("Invalid Album Id");
-        }
-
+        isValidId(id);
         JsonNode album = getJsonAlbum(id);
         if (album == null) {
             return null;
         }
         return objectMapper.treeToValue(album, Album.class);
+    }
+
+    private void isValidId(String id){
+        if (!SpotifyUtils.isValidId(id)) {
+            throw new InvalidIdException("Invalid Id");
+        }
     }
 
     private JsonNode getJsonAlbum(String id) throws IOException {
@@ -153,9 +160,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
             throw new MissingDataException("Corrupted Data");
         }
-        if (!SpotifyUtils.isValidId(album.getId())){
-            throw new InvalidIdException("Invalid Album Id");
-        }
+        isValidId(album.getId());
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
             return null;
@@ -178,9 +183,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
             return null;
         }
-        if (!SpotifyUtils.isValidId(album.getId())) {
-            throw new InvalidIdException("Invalid Album Id");
-        }
+        isValidId(album.getId());
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
             return null;
@@ -199,10 +202,17 @@ public class JSONDataSourceService implements DataSourceService{
     }
 
     @Override
+    public void addNewTrackToAlbum() {}
+
+    @Override
+    public void updateTrackInAlbum() {}
+
+    @Override
+    public void deleteTrackFromAlbum() {}
+
+    @Override
     public boolean deleteAlbumById(String id) throws IOException {
-        if (!SpotifyUtils.isValidId(id)) {
-            throw new InvalidIdException("Invalid Album Id");
-        }
+        isValidId(id);
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null || !albums.has(id)){
             return false;
@@ -213,12 +223,10 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public List<Track> getAlbumTracks(String id) throws IOException {
+        isValidId(id);
         JsonNode album = getJsonAlbum(id);
         if (album == null || !album.has("tracks")) {
             return null;
-        }
-        if (!SpotifyUtils.isValidId(id)) {
-            throw new InvalidIdException("Invalid Album Id");
         }
         JsonNode tracksNode = album.get("tracks");
         List<Track> tracks = new ArrayList<>();
@@ -246,6 +254,7 @@ public class JSONDataSourceService implements DataSourceService{
 
     @Override
     public Song getSongById(String id) throws IOException {
+        isValidId(id);
         JsonNode songs = loadJsonData(songsPath);
         if (songs == null || !songs.isArray()) {
             return null;
@@ -265,7 +274,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (song == null || song.getId() == null || song.getId().isEmpty()) {
             return null;
         }
-
+        isValidId(song.getId());
         JsonNode songsNode = loadJsonData(songsPath);
         if (songsNode == null || !songsNode.isArray()) {
             songsNode = objectMapper.createArrayNode();
@@ -293,7 +302,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (song == null || song.getId() == null || song.getId().isEmpty()) {
             return null;
         }
-
+        isValidId(song.getId());
         JsonNode songsNode = loadJsonData(songsPath);
         if (songsNode == null || !songsNode.isArray()) {
             return null;
@@ -328,6 +337,7 @@ public class JSONDataSourceService implements DataSourceService{
         if (id == null || id.isEmpty()) {
             return false;
         }
+        isValidId(id);
         JsonNode songsNode = loadJsonData(songsPath);
         if (songsNode == null || !songsNode.isArray()) {
             return false;

@@ -24,6 +24,9 @@ public interface DataSourceService {
     Album createAlbum(Album album) throws IOException;
     Album updateAlbum(Album album) throws IOException;
 
+    void addNewTrackToAlbum();
+    void updateTrackInAlbum();
+    void deleteTrackFromAlbum();
     boolean deleteAlbumById(String id) throws IOException;
 
     List<Track> getAlbumTracks(String id) throws IOException;

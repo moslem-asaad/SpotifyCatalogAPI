@@ -59,6 +59,21 @@ public class DatabaseDataSourceService implements DataSourceService{
     }
 
     @Override
+    public void addNewTrackToAlbum() {
+
+    }
+
+    @Override
+    public void updateTrackInAlbum() {
+
+    }
+
+    @Override
+    public void deleteTrackFromAlbum() {
+
+    }
+
+    @Override
     public boolean deleteAlbumById(String id) throws IOException {
         return false;
     }

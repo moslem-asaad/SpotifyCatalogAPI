@@ -29,10 +29,6 @@ public class ArtistController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Artist> getArtistById(@PathVariable String id) throws IOException {
-        if (!SpotifyUtils.isValidId(id)) {
-            return ResponseEntity.badRequest().build();
-        }
-
         Artist artist = dataSourceService.getArtistById(id);
         if (artist == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -55,9 +51,6 @@ public class ArtistController {
 
     @PostMapping
     public ResponseEntity<Artist> createArtist(@RequestBody Artist artist) throws IOException {
-        if (!SpotifyUtils.isValidId(artist.getId())) {
-            return ResponseEntity.badRequest().build();
-        }
         Artist createdArtist = dataSourceService.addArtist(artist);
         if (createdArtist == null) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
@@ -67,9 +60,6 @@ public class ArtistController {
 
     @PutMapping("/{id}")
     public ResponseEntity<Artist> updateArtistById(@PathVariable String id, @RequestBody Artist updatedArtist) throws IOException {
-        if (!SpotifyUtils.isValidId(id)) {
-            return ResponseEntity.badRequest().build();
-        }
         Artist currArtist = dataSourceService.getArtistById(id);
         if (currArtist == null) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -85,9 +75,6 @@ public class ArtistController {
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteArtistById(@PathVariable String id) throws IOException {
-        if (!SpotifyUtils.isValidId(id)) {
-            return ResponseEntity.badRequest().build();
-        }
         boolean isDeleted = dataSourceService.deleteArtistById(id);
         if (!isDeleted) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();

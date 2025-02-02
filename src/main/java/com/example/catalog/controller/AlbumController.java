@@ -89,6 +89,7 @@ public class AlbumController {
 
     @PostMapping("/{id}/tracks")
     public ResponseEntity<Album> addNewTrackToAlbum(@PathVariable String id,@RequestBody Track track) throws IOException{
+        dataSourceService.addNewTrackToAlbum();
         Album album = dataSourceService.getAlbumById(id);
         if (album == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -106,6 +107,7 @@ public class AlbumController {
 
     @PutMapping("/{id}/tracks/{track_id}")
     public ResponseEntity<Album> updateTrackInAlbum(@PathVariable String id,@RequestBody Track track) throws IOException {
+        dataSourceService.updateTrackInAlbum();
         Album album = dataSourceService.getAlbumById(id);
         if (album == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -122,7 +124,8 @@ public class AlbumController {
     }
 
     @DeleteMapping("/{id}/tracks/{track_id}")
-    public ResponseEntity<Album> deleteTrackFrom(@PathVariable String id,@PathVariable String track_id) throws IOException {
+    public ResponseEntity<Album> deleteTrackFromAlbum(@PathVariable String id,@PathVariable String track_id) throws IOException {
+        dataSourceService.deleteTrackFromAlbum();
         Album album = dataSourceService.getAlbumById(id);
         if (album == null){
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
