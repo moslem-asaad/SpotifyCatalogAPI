@@ -12,6 +12,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import jdk.jshell.spi.ExecutionControl;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,9 +28,12 @@ import java.util.List;
 public class JSONDataSourceService implements DataSourceService{
     private final ObjectMapper objectMapper = new ObjectMapper();
 
-    private final String artistPath = "data/popular_artistsTest.json";
-    private final String albumPath = "data/albums.json";
-    private final String songsPath = "data/popular_songs.json";
+    @Value("${artists.path}")
+    private String artistPath;
+    @Value("${albums.path}")
+    private String albumPath;
+    @Value("${songs.path}")
+    private String songsPath;
 
     @Override
     public Artist getArtistById(String id) throws IOException {

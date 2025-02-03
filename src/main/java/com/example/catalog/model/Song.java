@@ -7,6 +7,7 @@ import java.util.List;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class Song {
     private String id;
+
     private String name;
     private int popularity;
     private long duration_ms;
