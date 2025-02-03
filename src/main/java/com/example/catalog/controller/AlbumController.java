@@ -28,9 +28,6 @@ public class AlbumController {
     @GetMapping
     public ResponseEntity<List<Album>> getAllAlbums() throws IOException {
         List<Album> albums = dataSourceService.getAllAlbums();
-        if (albums == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         if (albums.isEmpty()){
             return ResponseEntity.noContent().build();
         }
@@ -40,41 +37,26 @@ public class AlbumController {
     @GetMapping("/{id}")
     public ResponseEntity<Album> getAlbumById(@PathVariable String id) throws IOException{
         Album album = dataSourceService.getAlbumById(id);
-        if (album == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.ok(album);
     }
 
     @PostMapping
     public ResponseEntity<Album> createAlbum(@RequestBody Album album) throws IOException{
         Album createdAlbum = dataSourceService.createAlbum(album);
-        if (createdAlbum == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdAlbum);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Album> updateAlbumById(@PathVariable String id, @RequestBody Album updatedAlbum) throws IOException{
         Album currAlbum = dataSourceService.getAlbumById(id);
-        if (currAlbum == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         updatedAlbum.setId(id);
         Album savedAlbum = dataSourceService.updateAlbum(updatedAlbum);
-        if (savedAlbum == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.ok(savedAlbum);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteAlbumById(@PathVariable String id) throws IOException{
         boolean isDeleted = dataSourceService.deleteAlbumById(id);
-        if (!isDeleted){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
@@ -91,17 +73,11 @@ public class AlbumController {
     public ResponseEntity<Album> addNewTrackToAlbum(@PathVariable String id,@RequestBody Track track) throws IOException{
         dataSourceService.addNewTrackToAlbum();
         Album album = dataSourceService.getAlbumById(id);
-        if (album == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Album newAlbum =  album.addTrack(track);
         if (newAlbum ==null){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         Album savedAlbum =  dataSourceService.updateAlbum(newAlbum);
-        if (savedAlbum == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.ok(savedAlbum);
     }
 
@@ -109,17 +85,11 @@ public class AlbumController {
     public ResponseEntity<Album> updateTrackInAlbum(@PathVariable String id,@RequestBody Track track) throws IOException {
         dataSourceService.updateTrackInAlbum();
         Album album = dataSourceService.getAlbumById(id);
-        if (album == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Album newAlbum =  album.updateTrack(track);
         if (newAlbum ==null){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         Album savedAlbum =  dataSourceService.updateAlbum(newAlbum);
-        if (savedAlbum == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.ok(savedAlbum);
     }
 
@@ -127,17 +97,11 @@ public class AlbumController {
     public ResponseEntity<Album> deleteTrackFromAlbum(@PathVariable String id,@PathVariable String track_id) throws IOException {
         dataSourceService.deleteTrackFromAlbum();
         Album album = dataSourceService.getAlbumById(id);
-        if (album == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         Album newAlbum =  album.deleteTrack(track_id);
         if (newAlbum ==null){
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
         Album savedAlbum =  dataSourceService.updateAlbum(newAlbum);
-        if (savedAlbum == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.ok(savedAlbum);
     }
 }

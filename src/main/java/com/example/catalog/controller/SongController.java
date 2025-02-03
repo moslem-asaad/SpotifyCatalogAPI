@@ -45,23 +45,14 @@ public class SongController {
     @PostMapping
     public ResponseEntity<Song> createSong(@RequestBody Song song) throws IOException{
         Song createdSong = dataSourceService.createSong(song);
-        if (createdSong == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.status(HttpStatus.CREATED).body(createdSong);
     }
 
     @PutMapping("/{id}")
     public ResponseEntity<Song> updateSongById(@PathVariable String id, @RequestBody Song updatedSong) throws IOException{
         Song currSong = dataSourceService.getSongById(id);
-        if (currSong == null){
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
-        }
         updatedSong.setId(id);
         Song savedSong = dataSourceService.updateSong(updatedSong);
-        if (savedSong == null){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
-        }
         return ResponseEntity.ok(savedSong);
     }
 

@@ -1,7 +1,6 @@
 package com.example.catalog.services;
 
-import com.example.catalog.exceptions.InvalidIdException;
-import com.example.catalog.exceptions.MissingDataException;
+import com.example.catalog.exceptions.*;
 import com.example.catalog.model.Album;
 import com.example.catalog.model.Artist;
 import com.example.catalog.model.Song;
@@ -12,6 +11,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import jdk.jshell.spi.ExecutionControl;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -36,11 +36,11 @@ public class JSONDataSourceService implements DataSourceService{
         isValidId(id);
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null){
-            return null;
+            throw new ResourceNotFoundException("Artists not found.");
         }
         JsonNode artistNode = artists.get(id);
         if (artistNode == null) {
-            return null;
+            throw new ResourceNotFoundException("Artist with ID " + id + " not found.");
         }
         return objectMapper.treeToValue(artistNode, Artist.class);
     }
@@ -49,7 +49,7 @@ public class JSONDataSourceService implements DataSourceService{
     public List<Artist> getAllArtists() throws IOException {
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null){
-            return null;
+            throw new ResourceNotFoundException("Artists not found.");
         }
         List<Artist> artistList = new ArrayList<>();
         Iterator<JsonNode> elements = artists.elements();
@@ -62,7 +62,7 @@ public class JSONDataSourceService implements DataSourceService{
     @Override
     public Artist addArtist(Artist artist) throws IOException{
         if (artist == null || artist.getId() == null || artist.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(artist.getId());
         JsonNode artists = loadJsonData(artistPath);
@@ -71,46 +71,41 @@ public class JSONDataSourceService implements DataSourceService{
         }
         ObjectNode artistsObject = (ObjectNode) artists;
         if (artistsObject.has(artist.getId())){
-            return null;
+            throw new ItemExistsException("Artist Already Exists");
         }
 
         artistsObject.set(artist.getId(),objectMapper.valueToTree(artist));
 
-        if (saveJsonData(artistsObject,artistPath)){
-            return artist;
-        }else{
-            return null;
-        }
+        saveJsonData(artistsObject,artistPath);
+        return artist;
+
     }
 
     @Override
     public Artist updateArtist(Artist artist) throws IOException {
         if (artist == null || artist.getId() == null || artist.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(artist.getId());
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null){
-            return null;
+            throw new ResourceNotFoundException("Artists not found.");
         }
         ObjectNode artistsObject = (ObjectNode) artists;
         if (!artistsObject.has(artist.getId())){
-            return null;
+            throw new ItemExistsException("Artist Doesn't Exists");
         }
 
         artistsObject.set(artist.getId(),objectMapper.valueToTree(artist));
-        if (saveJsonData(artistsObject,artistPath)){
-            return artist;
-        }else{
-            return null;
-        }
+        saveJsonData(artistsObject,artistPath);
+        return artist;
     }
 
     @Override
     public boolean deleteArtistById(String id) throws IOException {
         JsonNode artists = loadJsonData(artistPath);
         if (artists == null || !artists.has(id)){
-            return false;
+            throw new ResourceNotFoundException("Artist not found.");
         }
         isValidId(id);
         ((ObjectNode)artists).remove(id);
@@ -121,7 +116,7 @@ public class JSONDataSourceService implements DataSourceService{
     public List<Album> getAllAlbums() throws IOException {
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
-            return null;
+            throw new ResourceNotFoundException("Albums not found.");
         }
         List<Album> albumList = new ArrayList<>();
         Iterator<JsonNode> elements = albums.elements();
@@ -136,7 +131,7 @@ public class JSONDataSourceService implements DataSourceService{
         isValidId(id);
         JsonNode album = getJsonAlbum(id);
         if (album == null) {
-            return null;
+            throw new ResourceNotFoundException("Album with ID " + id + " not found.");
         }
         return objectMapper.treeToValue(album, Album.class);
     }
@@ -150,7 +145,7 @@ public class JSONDataSourceService implements DataSourceService{
     private JsonNode getJsonAlbum(String id) throws IOException {
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null || !albums.has(id)){
-            return null;
+            throw new ResourceNotFoundException("Album with ID " + id + " not found.");
         }
         return albums.get(id);
     }
@@ -158,47 +153,42 @@ public class JSONDataSourceService implements DataSourceService{
     @Override
     public Album createAlbum(Album album) throws IOException {
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
-            throw new MissingDataException("Corrupted Data");
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(album.getId());
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
-            return null;
+            throw new ResourceNotFoundException("Albums not found.");
         }
         ObjectNode albumsObject = (ObjectNode) albums;
         if (albumsObject.has(album.getId())){
-            return null;
+            throw new ItemExistsException("Album Already Exists");
         }
 
         albumsObject.set(album.getId(),objectMapper.valueToTree(album));
-        if (saveJsonData(albumsObject,albumPath)){
-            return album;
-        }else{
-            return null;
-        }
+        saveJsonData(albumsObject,albumPath);
+        return album;
     }
 
     @Override
     public Album updateAlbum(Album album) throws IOException {
         if (album == null || album.getId() == null || album.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(album.getId());
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null){
-            return null;
+            throw new ResourceNotFoundException("Albums not found.");
         }
         ObjectNode albumsObject = (ObjectNode) albums;
         if (!albumsObject.has(album.getId())){
-            return null;
+            throw new ItemExistsException("Album Doesn't Exist");
         }
 
         albumsObject.set(album.getId(),objectMapper.valueToTree(album));
-        if (saveJsonData(albumsObject,albumPath)){
-            return album;
-        }else{
-            return null;
-        }
+        saveJsonData(albumsObject,albumPath);
+        return album;
+
     }
 
     @Override
@@ -215,7 +205,7 @@ public class JSONDataSourceService implements DataSourceService{
         isValidId(id);
         JsonNode albums = loadJsonData(albumPath);
         if (albums == null || !albums.has(id)){
-            return false;
+            throw new ResourceNotFoundException("Album with ID " + id + " not found.");
         }
         ((ObjectNode)albums).remove(id);
         return saveJsonData(albums,albumPath);
@@ -225,7 +215,10 @@ public class JSONDataSourceService implements DataSourceService{
     public List<Track> getAlbumTracks(String id) throws IOException {
         isValidId(id);
         JsonNode album = getJsonAlbum(id);
-        if (album == null || !album.has("tracks")) {
+        if (album == null ) {
+            throw new ResourceNotFoundException("Album not found.");
+        }
+        if (!album.has("tracks")){
             return null;
         }
         JsonNode tracksNode = album.get("tracks");
@@ -242,7 +235,7 @@ public class JSONDataSourceService implements DataSourceService{
     public List<Song> getAllSongs() throws IOException {
         JsonNode songs = loadJsonData(songsPath);
         if (songs == null){
-            return null;
+            throw new ResourceNotFoundException("Songs not found.");
         }
         List<Song> songList = new ArrayList<>();
         Iterator<JsonNode> elements = songs.elements();
@@ -256,8 +249,11 @@ public class JSONDataSourceService implements DataSourceService{
     public Song getSongById(String id) throws IOException {
         isValidId(id);
         JsonNode songs = loadJsonData(songsPath);
-        if (songs == null || !songs.isArray()) {
-            return null;
+        if (songs == null) {
+            throw new ResourceNotFoundException("Songs not found.");
+        }
+        if (!songs.isArray()){
+            throw new InternalException("Internal Error");
         }
         for (JsonNode songNode : songs) {
             JsonNode songIdNode = songNode.get("id");
@@ -265,14 +261,13 @@ public class JSONDataSourceService implements DataSourceService{
                 return objectMapper.treeToValue(songNode, Song.class);
             }
         }
-
-        return null;
+        throw new ResourceNotFoundException("Song not found.");
     }
 
     @Override
     public Song createSong(Song song) throws IOException {
         if (song == null || song.getId() == null || song.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(song.getId());
         JsonNode songsNode = loadJsonData(songsPath);
@@ -283,29 +278,29 @@ public class JSONDataSourceService implements DataSourceService{
         for (JsonNode existingSongNode : songsNode) {
             JsonNode songIdNode = existingSongNode.get("id");
             if (songIdNode != null && songIdNode.asText().equals(song.getId())) {
-                return null;
+                throw new ItemExistsException("Song already exists");
             }
         }
 
         JsonNode songNode = objectMapper.valueToTree(song);
         ((ArrayNode) songsNode).add(songNode);
-        if (saveJsonData(songsNode,songsPath)) {
-            return song;
-        } else {
-            return null;
-        }
+        saveJsonData(songsNode,songsPath);
+        return song;
 
     }
 
     @Override
     public Song updateSong(Song song) throws IOException {
         if (song == null || song.getId() == null || song.getId().isEmpty()) {
-            return null;
+            throw new MissingDataException("Missing required fields");
         }
         isValidId(song.getId());
         JsonNode songsNode = loadJsonData(songsPath);
-        if (songsNode == null || !songsNode.isArray()) {
-            return null;
+        if (songsNode == null) {
+            throw new ResourceNotFoundException("Songs not found.");
+        }
+        if (!songsNode.isArray()){
+            throw new InternalException("Internal Error");
         }
 
         ArrayNode updatedSongsArray = objectMapper.createArrayNode();
@@ -322,14 +317,12 @@ public class JSONDataSourceService implements DataSourceService{
         }
 
         if (!found) {
-            return null;
+            throw new ResourceNotFoundException("Song With Id: " + song.getId() +" not found.");
         }
 
-        if (saveJsonData(updatedSongsArray,songsPath)) {
-            return song;
-        } else {
-            return null;
-        }
+        saveJsonData(updatedSongsArray,songsPath);
+        return song;
+
     }
 
     @Override
@@ -368,23 +361,18 @@ public class JSONDataSourceService implements DataSourceService{
 
         BufferedReader reader = new BufferedReader(new InputStreamReader(in));
         return objectMapper.readTree(reader);
-
-
-//        ClassPathResource resource = new ClassPathResource(path);
-//        return objectMapper.readTree(resource.getFile());
     }
 
-    private boolean saveJsonData(JsonNode jsonData,String dataFilePath) {
+    private boolean saveJsonData(JsonNode jsonData,String dataFilePath) throws IOException {
         try {
             File file = new ClassPathResource(dataFilePath).getFile();
             objectMapper.writerWithDefaultPrettyPrinter().writeValue(file, jsonData);
             return true;
         } catch (IOException e) {
             e.printStackTrace();
-            return false;
+            throw new InternalException("Error Occurred in saving json data");
         }
     }
-
 
 
 }
