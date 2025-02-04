@@ -1,11 +1,13 @@
 package com.example.catalog.model;
 
-import java.util.List;
+import com.fasterxml.jackson.annotation.JsonInclude;
 
+import java.util.List;
+@JsonInclude(JsonInclude.Include.NON_NULL)
 public class Artist {
     private String id;
     private String name;
-    private int followers;
+    private long followers;
     private List<String> genres;
     private List<Image> images;
     private int popularity;
@@ -27,7 +29,7 @@ public class Artist {
         this.name = name;
     }
 
-    public int getFollowers() {
+    public long getFollowers() {
         return followers;
     }
 
