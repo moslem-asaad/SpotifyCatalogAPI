@@ -126,17 +126,13 @@ public class SpotifyAPIDataSources implements DataSourceService{
     }
 
     @Override
-    public void deleteTrackFromAlbum() {
+    public void deleteTrackFromAlbum(String album_id,String track_id) {
         throw new UnsupportedOperationException("Delete track from an Album Not supported on real spotify app");
     }
 
     @Override
     public boolean deleteAlbumById(String id) throws IOException {
-        isValidId(id);
-        String accessToken = isValidToken();
-        String url = "https://api.spotify.com/v1/me/albums?ids=" + id;
-        ResponseEntity<Void> response = callAPI2(accessToken,url,HttpMethod.DELETE);
-        return response.getStatusCode().is2xxSuccessful();
+        throw new UnsupportedOperationException("Delete Album Not supported on real spotify app");
     }
 
     @Override

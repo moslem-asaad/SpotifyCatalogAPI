@@ -1,5 +1,6 @@
 package com.example.catalog.model;
 
+import com.example.catalog.exceptions.ResourceNotFoundException;
 import com.fasterxml.jackson.annotation.JsonInclude;
 
 import java.util.List;
@@ -76,9 +77,9 @@ public class Album {
         return this;
     }
 
-    private Track getTrackById(String id){
+    private Track getTrackById(String trackId){
         for (Track track: tracks){
-            if (track.getId().equals(id)) return track;
+            if (track.getId().equals(trackId)) return track;
         }
         return null;
     }
@@ -103,6 +104,6 @@ public class Album {
                 return this;
             }
         }
-        return null;
+        throw new ResourceNotFoundException("Track Not Found");
     }
 }

@@ -95,7 +95,7 @@ public class AlbumController {
 
     @DeleteMapping("/{id}/tracks/{track_id}")
     public ResponseEntity<Album> deleteTrackFromAlbum(@PathVariable String id,@PathVariable String track_id) throws IOException {
-        dataSourceService.deleteTrackFromAlbum();
+        dataSourceService.deleteTrackFromAlbum(id,track_id);
         Album album = dataSourceService.getAlbumById(id);
         Album newAlbum =  album.deleteTrack(track_id);
         if (newAlbum ==null){

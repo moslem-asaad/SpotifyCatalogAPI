@@ -15,12 +15,16 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
+import org.springframework.util.FileCopyUtils;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
@@ -44,20 +48,23 @@ public class SongControllerTest {
 
 
     private final ObjectMapper objectMapper = new ObjectMapper();
-    private final Path jsonFilePath = Path.of("data/popular_songsTests.json");
-    private final Path backupFilePath = Path.of("data/popular_artistsTests_backup.json");
 
-    @BeforeAll
+    private ClassPathResource jsonFile = new ClassPathResource("data/popular_songsTests.json");
+    private ClassPathResource targetFile = new ClassPathResource("data/popular_songsTests_backup.json");
+
+
+        @BeforeAll
     void backupJsonFile() throws IOException {
-        // Backup the JSON file before tests
-        Files.copy(jsonFilePath, backupFilePath, StandardCopyOption.REPLACE_EXISTING);
+        InputStream inputStream = jsonFile.getInputStream();
+        FileCopyUtils.copy(inputStream, Files.newOutputStream(targetFile.getFile().toPath()));
     }
 
     @AfterAll
     void restoreJsonFile() throws IOException {
-        // Restore the original JSON file after tests
-        Files.copy(backupFilePath, jsonFilePath, StandardCopyOption.REPLACE_EXISTING);
-        Files.delete(backupFilePath);
+        ClassPathResource backupFile = new ClassPathResource("data/popular_songsTests_backup.json");
+        InputStream inputStream = backupFile.getInputStream();
+        File file = jsonFile.getFile();
+        FileCopyUtils.copy(inputStream, Files.newOutputStream(file.toPath()));
     }
 
     @Test
@@ -98,12 +105,33 @@ public class SongControllerTest {
     }
 
     @Test
+    void testCreateSong_Exists() throws Exception {
+        Song song = new Song();
+        song.setId("0VjIjW4GlUZAMYd2vXMi3b");
+        song.setName("Test Test");
+        song.setPopularity(75);
+        song.setUri("spotify:track:TESTfU4dY1lWllzX7mPBI3");
+        song.setDuration_ms(200000);
+
+        ArrayList<Artist> artists = new ArrayList<>();
+        Artist artist = dataSourceService.getArtistById("1Xyo4u8uXC1ZmMpatF05PJ");
+        artists.add(artist);
+        song.setArtists(artists);
+
+        mockMvc.perform(post("/songs")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(song)))
+                .andExpect(status().isInternalServerError());
+
+    }
+
+    @Test
     void testUpdateSong_Success() throws Exception {
         Song song = dataSourceService.getSongById("4Dvkj6JhhA12EX05fT7y2e");
         String name = song.getName();
         song.setName("Test Test Updated");
 
-        mockMvc.perform(put("/songs/0VjIjW4GlUZAMYd2vXMi3b")
+        mockMvc.perform(put("/songs/4Dvkj6JhhA12EX05fT7y2e")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(song)))
                 .andExpect(status().isOk())
@@ -116,6 +144,43 @@ public class SongControllerTest {
                         .content(objectMapper.writeValueAsString(song)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.name").value(name));
+    }
+
+    @Test
+    void testUpdateSong_NotFound() throws Exception {
+        Song song = dataSourceService.getSongById("4Dvkj6JhhA12EX05fT7y2e");
+        String name = song.getName();
+        song.setName("Test Test Updated");
+
+        mockMvc.perform(put("/songs/12jIjW4GlUZAMYd2vXMi3b")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(song)))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteSong_Success() throws Exception {
+
+        mockMvc.perform(delete("/songs/4Dvkj6JhhA12EX05fT7y2e")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNoContent());
+        mockMvc.perform(get("/songs/4Dvkj6JhhA12EX05fT7y2e")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteSong_NotFound() throws Exception {
+        mockMvc.perform(delete("/songs/5Dvkj6JhhA12EX05fT7y2e")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteSong_InvalidId() throws Exception {
+        mockMvc.perform(delete("/songs/123")
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isBadRequest());
     }
 
 }

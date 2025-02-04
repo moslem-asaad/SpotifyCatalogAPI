@@ -26,7 +26,7 @@ public interface DataSourceService {
 
     void addNewTrackToAlbum();
     void updateTrackInAlbum();
-    void deleteTrackFromAlbum();
+    void deleteTrackFromAlbum(String album_id,String track_id);
     boolean deleteAlbumById(String id) throws IOException;
 
     List<Track> getAlbumTracks(String id) throws IOException;

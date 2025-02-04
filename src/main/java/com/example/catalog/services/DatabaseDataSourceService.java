@@ -69,7 +69,7 @@ public class DatabaseDataSourceService implements DataSourceService{
     }
 
     @Override
-    public void deleteTrackFromAlbum() {
+    public void deleteTrackFromAlbum(String album_id,String track_id) {
 
     }
 

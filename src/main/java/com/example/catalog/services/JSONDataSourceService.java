@@ -108,10 +108,10 @@ public class JSONDataSourceService implements DataSourceService{
     @Override
     public boolean deleteArtistById(String id) throws IOException {
         JsonNode artists = loadJsonData(artistPath);
+        isValidId(id);
         if (artists == null || !artists.has(id)){
             throw new ResourceNotFoundException("Artist not found.");
         }
-        isValidId(id);
         ((ObjectNode)artists).remove(id);
         return saveJsonData(artists,artistPath);
     }
@@ -202,7 +202,10 @@ public class JSONDataSourceService implements DataSourceService{
     public void updateTrackInAlbum() {}
 
     @Override
-    public void deleteTrackFromAlbum() {}
+    public void deleteTrackFromAlbum(String album_id,String track_id) {
+        isValidId(album_id);
+        isValidId(track_id);
+    }
 
     @Override
     public boolean deleteAlbumById(String id) throws IOException {

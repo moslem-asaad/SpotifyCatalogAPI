@@ -64,6 +64,7 @@ public class ArtistController {
 
     @GetMapping("/{id}/albums")
     public ResponseEntity<List<Album>> getAlbumsByArtistId(@PathVariable String id) throws IOException {
+        dataSourceService.getArtistById(id);
         List<Song> allSongs = dataSourceService.getAllSongs();
         if (allSongs.isEmpty()) {
             return ResponseEntity.noContent().build();
@@ -87,6 +88,7 @@ public class ArtistController {
 
     @GetMapping("/{id}/songs")
     public ResponseEntity<List<Song>> getSongsByArtistId(@PathVariable String id) throws IOException {
+        dataSourceService.getArtistById(id);
         List<Song> allSongs = dataSourceService.getAllSongs();
         if (allSongs.isEmpty()) {
             return ResponseEntity.noContent().build();
